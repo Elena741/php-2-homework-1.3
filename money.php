@@ -19,11 +19,17 @@
        input {
         margin-right: 20px;
        }
+       .two {
+        display: inline-block;
+       }
        h4 {
         margin: 15px 0;
        }
        p {
         margin: 0;
+       }
+       .clear {
+        margin-top: 15px;
        }
        span {
         font-size: 24px;
@@ -40,7 +46,7 @@
             <input type="date" name="date-add">
             <input type="text" name="money" placeholder="сумма в формате 250.30">
             <input type="text" name="descript" placeholder="описание покупки">
-            <input type="submit" name="add" value="Внести данные">
+            <input type="submit" name="add" value="Внести данные">            
     </fieldset>
 </form>
 
@@ -65,14 +71,13 @@ if (isset($_POST['add'])) {
         $money    = clean($money);
         $descript = clean($descript);
         
-        
+        $d3= date("d-m-Y", strtotime($_POST['date-add']));
         $result[] = $_POST['date-add'];
         $result[] = $money;
         $result[] = $descript;
-        $report   = implode(' - ', $result);
 ?>
 <h4>Внесены следующие данные:</h4>
-<p><?= $report ?></p>
+<p><?=$d3?> / <?=$_POST['money']?> -- <?=$_POST['descript']?></p>
 <?php
         $fo  = fopen('money.csv', "ab");
         $fpc = fputcsv($fo, $result, ",");
@@ -82,15 +87,16 @@ if (isset($_POST['add'])) {
 ?>
 <form method="post">
     <fieldset>
-    <p class="head_test">Расход за выбранную дату</p>
+    <p class="head_test">Расход за выбранный период</p>
 
-        <input type="date" name="date-check">
-        <input type="submit" name="check" value="Рассчитать">
+        <p class="two">начало периода <input type="date" name="date-check1"></p>
+        <p class="two">конец периода <input type="date" name="date-check2"></p>
+                <input  class="two" type="submit" name="check" value="Рассчитать">
     </fieldset>
 </form>
 <?php
 if (isset($_POST['check'])) {
-    if (empty($_POST['date-check'])) {
+    if (empty($_POST['date-check1']) || empty($_POST['date-check2'])) {
         echo "Введите дату";
     } else {
         
@@ -100,12 +106,15 @@ if (isset($_POST['check'])) {
         }
         fclose($fp);
         
-        $d = $_POST['date-check'];
+        $d1 = $_POST['date-check1'];
+        $d1= date("d-m-Y", strtotime($d1));
+        $d2 = $_POST['date-check2'];
+        $d2= date("d-m-Y", strtotime($d2));
 ?>
-        <p><h4><?= $d ?> вы приобрели:</h4></p>
+        <p><h4>С <?= $d1 ?> по <?= $d2 ?> вы приобрели:</h4></p>
          <?php
         foreach ($list as $value) {
-            if ($value[0] == $_POST['date-check']) {
+            if ($value[0] >= $_POST['date-check1'] && $value[0] <= $_POST['date-check2']) {
                 $check[]       = $value;
                 $a             = "$value[1] - $value[2]";
                 $money_check[] = $value[1];
